@@ -1,4 +1,4 @@
-package practice.springsecurity.security.listener;
+package practice.springsecurity.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import practice.springsecurity.domain.entity.Account;
 import practice.springsecurity.domain.entity.Resources;
 import practice.springsecurity.domain.entity.Role;
+import practice.springsecurity.domain.entity.RoleHierarchy;
 import practice.springsecurity.domain.repository.ResourcesRepository;
+import practice.springsecurity.domain.repository.RoleHierarchyRepository;
 import practice.springsecurity.domain.repository.RoleRepository;
 import practice.springsecurity.domain.repository.UserRepository;
 
@@ -27,6 +29,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     private final RoleRepository roleRepository;
     private final ResourcesRepository resourcesRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleHierarchyRepository roleHierarchyRepository;
     private static AtomicInteger count = new AtomicInteger(0);
 
     @Override
@@ -49,11 +52,11 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
         Role adminRole = createRoleIfNotFound("ROLE_ADMIN", "관리자");
         Role managerRole = createRoleIfNotFound("ROLE_MANAGER", "매니저");
-        Role childRole1 = createRoleIfNotFound("ROLE_USER", "회원");
+        Role userRole = createRoleIfNotFound("ROLE_USER", "회원");
 
         roles.add(adminRole);
         roles1.add(managerRole);
-        roles3.add(childRole1);
+        roles3.add(userRole);
 
         createUserIfNotFound("admin", "pass", "admin@gmail.com", 10,  roles);
         createUserIfNotFound("manager", "pass", "manager@gmail.com", 20, roles1);
@@ -63,6 +66,9 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         createResourceIfNotFound("/mypage", "", roles, "url");
         createResourceIfNotFound("/messages", "", roles, "url");
         createResourceIfNotFound("/config", "", roles, "url");
+
+        createRoleHierarchyIfNotFound(userRole, managerRole);
+        createRoleHierarchyIfNotFound(managerRole, adminRole);
 
 //        createResourceIfNotFound("io.security.corespringsecurity.aopsecurity.method.AopMethodService.methodTest", "", roles1, "method");
 //        createResourceIfNotFound("io.security.corespringsecurity.aopsecurity.method.AopMethodService.innerCallMethodTest", "", roles1, "method");
@@ -115,5 +121,27 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .build();
         }
         return resourcesRepository.save(resources);
+    }
+
+    @Transactional
+    public void createRoleHierarchyIfNotFound(Role childRole, Role parentRole) {
+
+        RoleHierarchy roleHierarchy = roleHierarchyRepository.findByChildName(parentRole.getRoleName());
+        if (roleHierarchy == null) {
+            roleHierarchy = RoleHierarchy.builder()
+                    .childName(parentRole.getRoleName())
+                    .build();
+        }
+        RoleHierarchy parentRoleHierarchy = roleHierarchyRepository.save(roleHierarchy);
+
+        roleHierarchy = roleHierarchyRepository.findByChildName(childRole.getRoleName());
+        if (roleHierarchy == null) {
+            roleHierarchy = RoleHierarchy.builder()
+                    .childName(childRole.getRoleName())
+                    .build();
+        }
+
+        RoleHierarchy childRoleHierarchy = roleHierarchyRepository.save(roleHierarchy);
+        childRoleHierarchy.setParentName(parentRoleHierarchy);
     }
 }
