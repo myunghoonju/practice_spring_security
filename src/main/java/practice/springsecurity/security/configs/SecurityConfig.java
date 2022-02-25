@@ -26,6 +26,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import practice.springsecurity.security.common.FormWebAuthenticationDetailsSource;
 import practice.springsecurity.security.factory.UrlResourcesMapFactoryBean;
+import practice.springsecurity.security.filter.PermitAllFilter;
 import practice.springsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import practice.springsecurity.security.handler.AjaxAuthenticationSuccessHandler;
 import practice.springsecurity.security.handler.FormAccessDeniedHandler;
@@ -48,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final AuthenticationSuccessHandler formAuthenticationSuccessHandler;
     private final AuthenticationFailureHandler formAuthenticationFailureHandler;
     private final SecurityResourceService service;
+    private String[] permitAllResources = {"/", "/login", "/user/login/**"};
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -138,6 +140,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    public PermitAllFilter customFilterSecurityInterceptor() throws Exception {
+
+        PermitAllFilter permitAllFilter = new PermitAllFilter(permitAllResources);
+        permitAllFilter.setSecurityMetadataSource(urlFilterInvocationSecurityMetadataSource());
+        permitAllFilter.setAccessDecisionManager(affirmativeBased());
+        permitAllFilter.setAuthenticationManager(authenticationManagerBean());
+        return permitAllFilter;
+    }
+
+   /*
+    @Bean
     public FilterSecurityInterceptor customFilterSecurityInterceptor() throws Exception {
 
         FilterSecurityInterceptor filterSecurityInterceptor = new FilterSecurityInterceptor();
@@ -146,6 +159,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         filterSecurityInterceptor.setAuthenticationManager(authenticationManagerBean());
         return filterSecurityInterceptor;
     }
+    */
 
     private AccessDecisionManager affirmativeBased() {
         AffirmativeBased affirmativeBased = new AffirmativeBased(getAccessDecistionVoters());
