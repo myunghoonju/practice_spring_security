@@ -25,15 +25,18 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import practice.springsecurity.security.common.FormWebAuthenticationDetailsSource;
+import practice.springsecurity.security.factory.UrlResourcesMapFactoryBean;
 import practice.springsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import practice.springsecurity.security.handler.AjaxAuthenticationSuccessHandler;
 import practice.springsecurity.security.handler.FormAccessDeniedHandler;
-import practice.springsecurity.security.metadatasource.UrlFilterInvocationSecurityMetadatsSource;
+import practice.springsecurity.security.metadatasource.UrlFilterInvocationSecurityMetadataSource;
 import practice.springsecurity.security.provider.AjaxAuthenticationProvider;
 import practice.springsecurity.security.provider.FormAuthenticationProvider;
+import practice.springsecurity.security.service.SecurityResourceService;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 @RequiredArgsConstructor
 @Configuration
@@ -44,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final FormWebAuthenticationDetailsSource formWebAuthenticationDetailsSource;
     private final AuthenticationSuccessHandler formAuthenticationSuccessHandler;
     private final AuthenticationFailureHandler formAuthenticationFailureHandler;
+    private final SecurityResourceService service;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -153,8 +157,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public FilterInvocationSecurityMetadataSource urlFilterInvocationSecurityMetadataSource() {
-        return new UrlFilterInvocationSecurityMetadatsSource();
+    public FilterInvocationSecurityMetadataSource urlFilterInvocationSecurityMetadataSource() throws Exception {
+        return new UrlFilterInvocationSecurityMetadataSource(urlResourcesMapFactoryBean().getObject(), service);
+    }
+
+    private UrlResourcesMapFactoryBean urlResourcesMapFactoryBean() {
+        return new UrlResourcesMapFactoryBean(service);
     }
 
 

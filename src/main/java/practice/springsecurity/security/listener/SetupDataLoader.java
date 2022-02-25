@@ -42,31 +42,32 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         alreadySetup = true;
     }
 
-
-
     private void setupSecurityResources() {
         Set<Role> roles = new HashSet<>();
-        Role adminRole = createRoleIfNotFound("ROLE_ADMIN", "관리자");
-        roles.add(adminRole);
-        createResourceIfNotFound("/admin/**", "", roles, "url");
-        Account account = createUserIfNotFound("admin", "pass", "admin@gmail.com", 10,  roles);
+        Set<Role> roles1 = new HashSet<>();
+        Set<Role> roles3 = new HashSet<>();
 
-//        Set<Role> roles1 = new HashSet<>();
-//
-//        Role managerRole = createRoleIfNotFound("ROLE_MANAGER", "매니저");
-//        roles1.add(managerRole);
+        Role adminRole = createRoleIfNotFound("ROLE_ADMIN", "관리자");
+        Role managerRole = createRoleIfNotFound("ROLE_MANAGER", "매니저");
+        Role childRole1 = createRoleIfNotFound("ROLE_USER", "회원");
+
+        roles.add(adminRole);
+        roles1.add(managerRole);
+        roles3.add(childRole1);
+
+        createUserIfNotFound("admin", "pass", "admin@gmail.com", 10,  roles);
+        createUserIfNotFound("manager", "pass", "manager@gmail.com", 20, roles1);
+        createUserIfNotFound("user", "pass", "user@gmail.com", 30, roles3);
+
+        createResourceIfNotFound("/admin/**", "", roles, "url");
+        createResourceIfNotFound("/mypage", "", roles, "url");
+        createResourceIfNotFound("/messages", "", roles, "url");
+        createResourceIfNotFound("/config", "", roles, "url");
+
 //        createResourceIfNotFound("io.security.corespringsecurity.aopsecurity.method.AopMethodService.methodTest", "", roles1, "method");
 //        createResourceIfNotFound("io.security.corespringsecurity.aopsecurity.method.AopMethodService.innerCallMethodTest", "", roles1, "method");
 //        createResourceIfNotFound("execution(* io.security.corespringsecurity.aopsecurity.pointcut.*Service.*(..))", "", roles1, "pointcut");
-//        createUserIfNotFound("manager", "pass", "manager@gmail.com", 20, roles1);
-//
-//        Set<Role> roles3 = new HashSet<>();
-//
-//        Role childRole1 = createRoleIfNotFound("ROLE_USER", "회원");
-//        roles3.add(childRole1);
 //        createResourceIfNotFound("/users/**", "", roles3, "url");
-//        createUserIfNotFound("user", "pass", "user@gmail.com", 30, roles3);
-
     }
 
     @Transactional
@@ -108,8 +109,9 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
             resources = Resources.builder()
                     .resourceName(resourceName)
                     .httpMethod(httpMethod)
-                    .resourceType(resourceType)
                     .orderNum(count.incrementAndGet())
+                    .resourceType(resourceType)
+                    .roleSet(roleSet)
                     .build();
         }
         return resourcesRepository.save(resources);
