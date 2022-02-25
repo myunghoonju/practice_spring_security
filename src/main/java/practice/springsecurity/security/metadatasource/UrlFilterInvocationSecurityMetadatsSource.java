@@ -22,9 +22,9 @@ public class UrlFilterInvocationSecurityMetadatsSource implements FilterInvocati
         requestMap.put(new AntPathRequestMatcher("/mypage"), Arrays.asList(new SecurityConfig("ROLE_USER")));
 
         if(requestMap != null){
-            for(Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : requestMap.entrySet()){
+            for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : requestMap.entrySet()) {
                 RequestMatcher matcher = entry.getKey();
-                if(matcher.matches(request)){
+                if (matcher.matches(request)) {
                     return entry.getValue();
                 }
             }
@@ -36,12 +36,7 @@ public class UrlFilterInvocationSecurityMetadatsSource implements FilterInvocati
     @Override
     public Collection<ConfigAttribute> getAllConfigAttributes() {
         Set<ConfigAttribute> allAttributes = new HashSet<>();
-
-        for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : requestMap
-                .entrySet()) {
-            allAttributes.addAll(entry.getValue());
-        }
-
+        this.requestMap.values().forEach(allAttributes::addAll);
         return allAttributes;
     }
 
