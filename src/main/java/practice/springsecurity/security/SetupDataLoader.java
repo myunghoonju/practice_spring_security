@@ -68,17 +68,13 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         createUserIfNotFound("user", "pass", "user@gmail.com", 30, roles3);
 
         createResourceIfNotFound("/admin/**", "", roles, "url");
-        createResourceIfNotFound("/mypage", "", roles, "url");
-        createResourceIfNotFound("/messages", "", roles, "url");
+        createResourceIfNotFound("/mypage", "", roles3, "url");
+        createResourceIfNotFound("/messages", "", roles1, "url");
         createResourceIfNotFound("/config", "", roles, "url");
+        createResourceIfNotFound("practice.springsecurity.domain.service", "", roles1, "method");
 
         createRoleHierarchyIfNotFound(userRole, managerRole);
         createRoleHierarchyIfNotFound(managerRole, adminRole);
-
-//        createResourceIfNotFound("io.security.corespringsecurity.aopsecurity.method.AopMethodService.methodTest", "", roles1, "method");
-//        createResourceIfNotFound("io.security.corespringsecurity.aopsecurity.method.AopMethodService.innerCallMethodTest", "", roles1, "method");
-//        createResourceIfNotFound("execution(* io.security.corespringsecurity.aopsecurity.pointcut.*Service.*(..))", "", roles1, "pointcut");
-//        createResourceIfNotFound("/users/**", "", roles3, "url");
     }
 
     @Transactional
@@ -96,10 +92,8 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     }
 
     @Transactional
-    public Account createUserIfNotFound(String userName, String password, String email, int age, Set<Role> roleSet) {
-
+    public void createUserIfNotFound(String userName, String password, String email, int age, Set<Role> roleSet) {
         Account account = userRepository.findByUsername(userName);
-
         if (account == null) {
             account = Account.builder()
                     .username(userName)
@@ -109,13 +103,13 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .userRoles(roleSet)
                     .build();
         }
-        return userRepository.save(account);
+
+        userRepository.save(account);
     }
 
     @Transactional
-    public Resources createResourceIfNotFound(String resourceName, String httpMethod, Set<Role> roleSet, String resourceType) {
+    public void createResourceIfNotFound(String resourceName, String httpMethod, Set<Role> roleSet, String resourceType) {
         Resources resources = resourcesRepository.findByResourceNameAndHttpMethod(resourceName, httpMethod);
-
         if (resources == null) {
             resources = Resources.builder()
                     .resourceName(resourceName)
@@ -125,7 +119,8 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .roleSet(roleSet)
                     .build();
         }
-        return resourcesRepository.save(resources);
+
+        resourcesRepository.save(resources);
     }
 
     @Transactional
