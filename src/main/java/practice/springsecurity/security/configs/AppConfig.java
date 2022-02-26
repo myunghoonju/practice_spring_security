@@ -2,6 +2,7 @@ package practice.springsecurity.security.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import practice.springsecurity.domain.repository.AccessIpRepository;
 import practice.springsecurity.domain.repository.ResourcesRepository;
 import practice.springsecurity.security.service.SecurityResourceService;
 
@@ -9,7 +10,7 @@ import practice.springsecurity.security.service.SecurityResourceService;
 public class AppConfig {
 
     @Bean
-    public SecurityResourceService securityResourceService(ResourcesRepository repository) {
-        return new SecurityResourceService(repository);
+    public SecurityResourceService securityResourceService(ResourcesRepository repository, AccessIpRepository ipRepository) {
+        return new SecurityResourceService(repository, ipRepository);
     }
 }

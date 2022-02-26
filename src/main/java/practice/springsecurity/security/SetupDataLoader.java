@@ -6,10 +6,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import practice.springsecurity.domain.entity.AccessIp;
 import practice.springsecurity.domain.entity.Account;
 import practice.springsecurity.domain.entity.Resources;
 import practice.springsecurity.domain.entity.Role;
 import practice.springsecurity.domain.entity.RoleHierarchy;
+import practice.springsecurity.domain.repository.AccessIpRepository;
 import practice.springsecurity.domain.repository.ResourcesRepository;
 import practice.springsecurity.domain.repository.RoleHierarchyRepository;
 import practice.springsecurity.domain.repository.RoleRepository;
@@ -30,6 +33,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     private final ResourcesRepository resourcesRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleHierarchyRepository roleHierarchyRepository;
+    private final AccessIpRepository accessIpRepository;
     private static AtomicInteger count = new AtomicInteger(0);
 
     @Override
@@ -41,6 +45,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         }
 
         setupSecurityResources();
+        setupAccessIpData();
 
         alreadySetup = true;
     }
@@ -143,5 +148,23 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
         RoleHierarchy childRoleHierarchy = roleHierarchyRepository.save(roleHierarchy);
         childRoleHierarchy.setParentName(parentRoleHierarchy);
+    }
+
+    private void setupAccessIpData() {
+        AccessIp ip1 = AccessIp.builder()
+                .ipAddress("0:0:0:0:0:0:0:1")
+                .build();
+        AccessIp ip2 = AccessIp.builder()
+                .ipAddress("127.0.0.1")
+                .build();
+
+        AccessIp ip1Addr = accessIpRepository.findByIpAddress(ip1.getIpAddress());
+        AccessIp ip2Addr = accessIpRepository.findByIpAddress(ip2.getIpAddress());
+        if (ObjectUtils.isEmpty(ip1Addr)) {
+            accessIpRepository.save(ip1);
+        }
+        if (ObjectUtils.isEmpty(ip2Addr)) {
+            accessIpRepository.save(ip2);
+        }
     }
 }
